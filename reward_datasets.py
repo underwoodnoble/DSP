@@ -160,7 +160,7 @@ def load_jsonl_data(data_path):
         lines = f.read().strip().split('\n')
     
     data_list = [json.loads(l) for l in lines]
-    print(f"Jsonl data length: {len(data_list)}")
+    print_rank_0(f"Jsonl data length: {len(data_list)}")
     return data_list
 
 
@@ -173,24 +173,17 @@ def load_json_data(data_path):
 
 def load_text_score_dataset(data_path, tokenizer=None, debug=False, padding=False):
     all_data_list = []
-    if isinstance(data_path, list):
-        for dp in data_path:
-            dp = dp.strip()
-            print_rank_0("loading text-score dataset from: \n   {}".format(dp))
+    if isinstance(data_path, str): data_path = [data_path]
+    for dp in data_path:
+        dp = dp.strip()
+        print_rank_0("loading text-score dataset from: \n   {}".format(dp))
 
-            if dp[-4:] == 'json':
-                all_data_list.extend(load_json_data(dp))
-            else:
-                all_data_list.extend(load_jsonl_data(dp))
-    else:
-        print_rank_0("loading text-score dataset from: \n   {}".format(data_path))
-        data_path = data_path.strip()
-        if data_path[-4:] == 'json':
-            all_data_list = load_json_data(data_path)
+        if dp[-4:] == 'json':
+            all_data_list.extend(load_json_data(dp))
         else:
-            all_data_list = load_jsonl_data(data_path)
+            all_data_list.extend(load_jsonl_data(dp))
 
-    print_rank_0(len(all_data_list))
+    print_rank_0(f"Dataset total length: {len(all_data_list)}")
     max_response_num=1
     if padding:
         max_response_num = max([len(item['score']) for item in all_data_list])    
